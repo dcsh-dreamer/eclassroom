@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-primary">
+  <a class="navbar-brand" href="/">線上教室</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+    <i class="navbar-toggler-icon"></i>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarColor01">
+    <ul class="navbar-nav">
+    {% if user.is_authenticated %}
+      {% if user.is_superuser %} 
+      <li class="nav-item">
+        <a href="{% url 'user_list' %}" class="nav-link">
+          <i class="fas fa-users"></i> 帳號列表
+        </a>
+      </li>
+      {% endif %}
+      <li class="nav-item dropdown">
+        <a href="#" class="nav-link dropdown-toggle" id="user-dropdown" data-toggle="dropdown">
+          <i class="fas fa-user"></i> {{ user.username }}
+        </a>
+        <div class="dropdown-menu" aria-labelledby="user-dropdown">
+          <a href="{% url 'user_dashboard' %}" class="dropdown-item">
+            <i class="fas fa-tachometer-alt"></i> 儀表板
+          </a>
+          <a href="{% url 'password_change' %}" class="dropdown-item">
+            <i class="fas fa-lock"></i> 變更密碼
+          </a>
+          <a href="{% url 'logout' %}" class="dropdown-item">
+            <i class="fas fa-sign-out-alt"></i> 登出
+          </a>
+        </div>
+      </li>
+    {% else %}
+      <li class="nav-item">
+        <a href="{% url 'login' %}" class="nav-link">
+          <i class="fas fa-sign-in-alt"></i> 登入
+        </a>
+      </li>
+    {% endif %}
+    </ul>
+  </div>
+</nav>
