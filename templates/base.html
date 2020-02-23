@@ -13,14 +13,14 @@
   <div class="container my-3">
     {% if messages %}
     <section id="messages">
-      <ul class="messages">
+      <ul class="messages pl-0">
         {% for msg in messages %}
         <li class="alert alert-{{ msg.tags }}">{{ msg }}</li>
         {% endfor %}
       </ul>
     </section>
     {% endif %}
-    <section id="main-content" class="">
+    <section id="main-content">
       {% if title %}
       <h1 class="title">{{ title }}</h1>
       {% endif %}

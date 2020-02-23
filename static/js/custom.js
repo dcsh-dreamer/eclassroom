@@ -3,3 +3,5 @@ function add_css_class(filter, ...classes) {
     item.classList.add(...classes);
   });
 }
+
+add_css_class('.alert-error', 'alert-danger');

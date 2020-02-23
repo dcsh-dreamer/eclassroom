@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="uk-alert uk-alert-danger">403 Forbidden</h1>
+<div class="alert alert-danger">
+  <h1>403 Forbidden</h1>
+  <p>抱歉！您無權限進行這項操作！</p>
+  {{ reason }}
+</div>
 {% endblock content %}

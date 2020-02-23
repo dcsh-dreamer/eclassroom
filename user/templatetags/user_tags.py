@@ -1,12 +1,16 @@
 from django import template
-from django.contrib.auth.models import User, Group
 
 register = template.Library()
-
-@register.filter(name='in_group')
-def in_group(user, group_name):
-    return user.groups.filter(name=group_name).exists()
 
 @register.filter(name='is_teacher')
 def is_teacher(user):
     return user.groups.filter(name='teacher').exists()
+
+@register.filter(name='has_student')
+def has_student(course, user):
+    return course.enroll_set.filter(stu=user).exists()
+
+@register.filter(name='has_member')
+def has_member(course, user):
+    return course.teacher == user or \
+        course.enroll_set.filter(stu=user).exists()

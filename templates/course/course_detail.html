@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% load user_tags %}
+
+{% block content %}
+<div id="course_view" class="card">
+  {% with def_btn="btn btn-sm btn-primary" %}
+  <div class="card-header d-flex">
+    <div>
+      <a href="{% url 'course_view' course.id %}">{{ course.name }}</a>
+      <small>{{ course.teacher.first_name }} 老師</small>
+    </div>
+    {% if user.is_superuser or course.teacher == user %}
+    <div class="ml-auto">
+      <span class="badge badge-light">
+        選課密碼： {{ course.enroll_password }}
+      </span>
+      <a href="{% url 'course_edit' course.id %}" class="{{ def_btn }}">
+        <i class="fas fa-edit"></i> 編輯
+      </a>
+    </div >
+    {% endif %}
+  </div>
+  <div class="card-body">
+    {% block course_detail_body %}
+    <div id="student_op" class="btn-group1">
+      {% if not course|has_member:user and not user.is_superuser %}
+      <a href="{% url 'course_enroll' course.id %}" class="{{ def_btn }}">
+        <i class="fas fa-id-badge"></i> 選修
+      </a>
+      {% else %}
+      <a href="{% url 'course_users' course.id %}" class="{{ def_btn }}">
+        <i class="fas fa-users"></i> 修課名單
+      </a>
+        {% if course|has_student:user %}
+        <a href="{% url 'course_seat' course.id %}" class="{{ def_btn }}">
+          <i class="fas fa-chair"></i> 更改座號
+        </a>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% endblock %}
+  </div>
+  {% endwith %}
+</div>
+{% endblock %}

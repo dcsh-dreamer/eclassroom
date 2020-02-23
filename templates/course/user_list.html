@@ -1,0 +1,28 @@
+{% extends "course/course_detail.html" %}
+
+{% block course_detail_body %}
+<div id="course_users">
+  <table class="table table-sm table-hover">
+    <thead>
+      <tr>
+        <th>學校</th>
+        <th>帳號</th>
+        <th>座號</th>
+        <th>姓名</th>
+        <th>最近登入時間</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for enroll in enroll_list %}
+      <tr>
+        <td>{{ enroll.stu.last_name }}</td>
+        <td>{{ enroll.stu.username }}</td>
+        <td>{{ enroll.seat }}</td>
+        <td>{{ enroll.stu.first_name }}</td>
+        <td>{{ enroll.stu.last_login }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
