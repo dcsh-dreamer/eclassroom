@@ -23,22 +23,35 @@
   </div>
   <div class="card-body">
     {% block course_detail_body %}
-    <div id="student_op" class="btn-group1">
+    <div id="student_op" class="btn-group">
       {% if not course|has_member:user and not user.is_superuser %}
-      <a href="{% url 'course_enroll' course.id %}" class="{{ def_btn }}">
+      <a href="{% url 'course_enroll' course.id %}" class="{{ def_btn }} active">
         <i class="fas fa-id-badge"></i> 選修
       </a>
       {% else %}
       <a href="{% url 'course_users' course.id %}" class="{{ def_btn }}">
         <i class="fas fa-users"></i> 修課名單
       </a>
+      <a href="{% url 'course_msglist' course.id %}" class="{{ def_btn }}">
+        <i class="fas fa-list"></i> 公告列表
+      </a>
         {% if course|has_student:user %}
+        <a href="{% url 'user_msgsend' course.teacher_id %}" class="{{ def_btn }}">
+          <i class="fas fa-paper-plane"></i> 提問
+        </a>
         <a href="{% url 'course_seat' course.id %}" class="{{ def_btn }}">
           <i class="fas fa-chair"></i> 更改座號
         </a>
         {% endif %}
       {% endif %}
     </div>
+      {% if course.teacher == user %}
+      <div id="teacher_op" class="mt-2">
+        <a href="{% url 'course_msgbroadcast' course.id %}" class="btn btn-sm btn-secondary">
+          <i class="fas fa-bullhorn"></i> 發布公告
+        </a>
+      </div>
+      {% endif %}
     {% endblock %}
   </div>
   {% endwith %}

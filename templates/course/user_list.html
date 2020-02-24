@@ -10,6 +10,7 @@
         <th>座號</th>
         <th>姓名</th>
         <th>最近登入時間</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -20,6 +21,13 @@
         <td>{{ enroll.seat }}</td>
         <td>{{ enroll.stu.first_name }}</td>
         <td>{{ enroll.stu.last_login }}</td>
+        <td>
+          {% if enroll.stu_id != user.id %}
+          <a href="{% url 'user_msgsend' enroll.stu_id %}" class="btn btn-sm btn-secondary">
+            <i class="fas fa-paper-plane"></i> 傳訊
+          </a>
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>

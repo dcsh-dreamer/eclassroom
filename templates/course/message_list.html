@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul class="list-group">
+  {% for msg in message_list %}
+  <li class="list-group-item">
+    <small class="text-muted">{{ msg.created }}</small>
+    <a href="{% url 'user_msgread' msg.id %}">
+      {{ msg.title }} 
+    </a>
+    {% if msg.id not in read_list %}
+      <span class="badge badge-warning">New!</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% include "pagination.html" %}
+{% endblock %}

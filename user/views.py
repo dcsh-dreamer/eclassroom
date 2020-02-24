@@ -1,10 +1,11 @@
 from django.views.generic import *
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import *
+from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.db.models import Count
+from django.db.models import Q, Subquery
 from django import forms
+from django.contrib import messages
 from .models import *
 
 # 限定管理員才允許操作的混成類別
@@ -122,3 +123,91 @@ class UserTeacherToggle(SuperuserRequiredMixin, RedirectView):
 class UserDashboard(LoginRequiredMixin, TemplateView):
     extra_context = {'title': '我的儀表板'}
     template_name = 'user/dashboard.html'
+
+class MsgList(LoginRequiredMixin, ListView):
+    extra_context = {'title': '收件匣'}
+
+    def get_queryset(self):
+        user = self.request.user
+        return Message.objects.annotate(
+            read=Subquery(user.read_list.filter(
+                message=OuterRef('pk')).values('id'))
+        ).filter(
+            Q(recipient=user) | Q(course__in=user.enroll_set.values('course'))
+        ).select_related('course', 'sender').order_by('-created')
+
+class MsgOutbox(LoginRequiredMixin, ListView):
+    extra_context = {'title': '寄件匣'}
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.outbox.annotate(
+            read=Subquery(user.read_list.filter(
+                message=OuterRef('pk')).values('id'))
+        ).select_related('course', 'recipient').order_by('-created')
+
+class MsgRead(LoginRequiredMixin, DetailView):
+    model = Message
+    pk_url_kwarg = 'mid'
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('course', 'sender')
+
+    def get_context_data(self, **kwargs):
+        user = self.request.user
+        msg = self.object
+        if msg.status.filter(user=user).exists():
+            MessageStatus(message=msg, user=user).save()
+        return super().get_context_data()
+
+class MsgSend(LoginRequiredMixin, CreateView):
+    extra_context = {'title': '傳送訊息'}
+    fields = ['title', 'body']
+    model = Message
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, '訊息已送出！')
+        return self.request.POST.get('success_url')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['recipient'] = User.objects.get(id=self.kwargs['rid'])
+        ctx['success_url'] = self.request.META.get('HTTP_REFERER', '/')
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.sender = self.request.user
+        form.instance.recipient = User.objects.get(id=self.kwargs['rid'])
+        return super().form_valid(form)
+
+class MsgReply(LoginRequiredMixin, CreateView):
+    extra_context = {'title': '回覆訊息'}
+    model = Message
+    fields = ['title', 'body']
+
+    def get_initial(self):
+        self.msg = Message.objects.get(id=self.kwargs['mid'])
+        return {
+            'title': 'Re: '+self.msg.title,
+            'body':  "{}({}) 於 {} 寫道：\n> {}".format(
+                self.msg.sender.username,
+                self.msg.sender.first_name,
+                self.msg.created,
+                "> ".join(self.msg.body.split('\n'))
+            ),
+        }
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['recipient'] = self.msg.sender
+        ctx['success_url'] = self.request.META.get('HTTP_REFERER', '/')
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.sender = self.request.user
+        form.instance.recipient = self.msg.sender
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, '訊息已送出！')
+        return self.request.POST.get('success_url')

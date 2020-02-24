@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul class="list-group">
+  {% for msg in message_list %}
+  <li class="list-group-item d-md-flex">
+    <a href="{% url 'user_msgread' msg.id %}">
+      {% if msg.course %}
+      <span class="badge badge-danger">課程公告</span>
+      {% endif %}
+      {{ msg.title }}
+      {% if not msg.read %}
+        <span class="badge badge-warning">New!</span>
+      {% endif %}
+    </a>
+    <div class="ml-auto">
+      {% if msg.course %}
+        <a href="{% url 'course_view' msg.course.id %}">
+          {{ msg.course.name }}
+        </a>
+      {% else %}
+        {% if msg.sender == user %}
+          <span>{{ msg.recipient.username }}({{ msg.recipient.first_name }})</span>
+        {% else %}
+          <span>{{ msg.sender.username }}({{ msg.sender.first_name }})</span>
+        {% endif %}
+      {% endif %}
+      <small class="text-muted">
+        <i class="fas fa-clock"></i> {{ msg.created }}
+      </small>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

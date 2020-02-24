@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import *
 from django.contrib import messages
 from django import forms
 from .models import *
+from user.models import Message
 
 class TeacherReqiuredMixin(AccessMixin):
     def dispatch(self, request, *args, **kwargs):
@@ -116,7 +117,7 @@ class CourseUsers(CourseAccessMixin, ListView): # 修課名單
     def get_queryset(self):
         return self.course.enroll_set.select_related('stu').order_by('seat')
 
-class CourseEnrollSeat(CourseAccessMixin, UpdateView): # 變更座號
+class CourseEnrollSeat(CourseAccessMixin, UpdateView):  # 變更座號
     permission = COURSE_PERM_STUDENT
     extra_context = {'title': '變更座號'}
     fields = ['seat']
@@ -124,10 +125,46 @@ class CourseEnrollSeat(CourseAccessMixin, UpdateView): # 變更座號
 
     def get_success_url(self):
         return reverse('course_view', args=[self.course.id])
-    
+
     def get_object(self):
         return get_object_or_404(
-                    Enroll, 
-                    course=self.course, 
-                    stu=self.request.user
-               )
+            Enroll,
+            course=self.course,
+            stu=self.request.user
+        )
+
+
+class MsgList(CourseAccessMixin, ListView):  # 公告列表
+    permission = COURSE_PERM_MEMBER
+    extra_context = {'title': '公告列表'}
+    model = Message
+    paginate_by = 20
+    template_name = 'course/message_list.html'
+
+    def get_queryset(self):
+        self.extra_context.update({
+            'read_list': self.request.user.read_list.values_list('message', flat=True)
+        })
+        return self.course.notices.order_by('-created')
+
+class MsgCreate(CourseAccessMixin, CreateView):  # 教師新增課程公告
+    permission = COURSE_PERM_TEACHER
+    extra_context = {'title': '新增公告'}
+    model = Message
+    fields = ['title', 'body']
+    template_name = 'user/message_form.html'
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, '公告已張貼！')
+        return self.request.POST.get('success_url')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['success_url'] = self.request.META.get('HTTP_REFERER', '/')
+        ctx['course'] = self.course
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.course = self.course
+        form.instance.sender = self.request.user
+        return super().form_valid(form)

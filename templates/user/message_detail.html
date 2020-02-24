@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="message-card" class="card">
+  <div class="card-header d-md-flex">
+    <h4 class="">
+      {% if message.course %}
+      <span class="badge badge-danger">課程公告</span>
+      {% endif %}
+      {{ message.title }}
+    </h4>
+    <div class="ml-auto">
+      <span>{{ message.sender.username }}( {{ message.sender.first_name }})</span>
+      <small><i class="fas fa-clock"></i> {{ message.created }}</small>
+    </div>
+  </div>
+  <div class="card-body">
+    {{ message.body|linebreaks}}
+  </div>
+  <div class="card-footer">
+    <a href="{% url 'user_inbox' %}" class="btn btn-sm btn-primary">
+      <i class="fas fa-inbox"></i> 收件匣
+    </a>
+    {% if message.course %}
+      <a href="{% url 'course_msglist' message.course.id %}" class="btn btn-sm btn-primary">
+        <i class="fas fa-list"></i> 課程公告
+      </a>
+    {% elif message.sender != user %}
+      <a href="{% url 'user_msgreply' message.id %}" class="btn btn-sm btn-secondary">
+        <i class="fas fa-reply"></i> 回覆
+      </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

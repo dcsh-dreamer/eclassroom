@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    {% if course %}
+      課程: {{ course.name }}
+    {% else %}
+      收件人: {{ recipient.username }}({{ recipient.first_name }})
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <form id="msg-form" action="" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="success_url" value="{{ success_url }}">
+      <table class="table table-sm">
+        {{ form.as_table }}
+      </table>
+      <input type="submit" class="btn btn-sm btn-primary" value="送出">
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block custom_scripts %}
+<script>
+add_css_class('form table input, form table textarea', 'form-control');
+add_css_class('.errorlist', 'alert', 'alert-danger');
+add_css_class('.helptext ul', 'alert', 'alert-light');
+</script>
+{% endblock custom_scripts %}
