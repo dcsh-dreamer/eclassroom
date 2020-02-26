@@ -1,6 +1,5 @@
 from django.urls import path, include
 from .views import *
-from .models import *
 
 msg_urlpatterns = ([
     path('', MsgList.as_view(), name='course_msglist'),

@@ -1,13 +1,13 @@
 from django.urls import path, include
 from .views import *
 
-msg_urlpatterns = ([
+msg_urlpatterns = [
     path('', MsgList.as_view(), name='user_inbox'), 
     path('outbox/', MsgOutbox.as_view(), name='user_outbox'),
     path('<int:mid>/', MsgRead.as_view(), name='user_msgread'),
     path('<int:mid>/reply/', MsgReply.as_view(), name='user_msgreply'),
     path('send/<int:rid>/', MsgSend.as_view(), name='user_msgsend'), 
-])
+]
 
 urlpatterns = [
     path('', include('django.contrib.auth.urls')),

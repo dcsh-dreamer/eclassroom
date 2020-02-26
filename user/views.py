@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.db.models import Q, Subquery
+from django.db.models import Q, Subquery, OuterRef
 from django import forms
 from django.contrib import messages
 from .models import *
@@ -126,12 +126,13 @@ class UserDashboard(LoginRequiredMixin, TemplateView):
 
 class MsgList(LoginRequiredMixin, ListView):
     extra_context = {'title': '收件匣'}
+    paginate_by = 20
 
     def get_queryset(self):
         user = self.request.user
         return Message.objects.annotate(
             read=Subquery(user.read_list.filter(
-                message=OuterRef('pk')).values('id'))
+                message=OuterRef('pk')).values('read'))
         ).filter(
             Q(recipient=user) | Q(course__in=user.enroll_set.values('course'))
         ).select_related('course', 'sender').order_by('-created')
@@ -156,7 +157,7 @@ class MsgRead(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         user = self.request.user
         msg = self.object
-        if msg.status.filter(user=user).exists():
+        if not msg.status.filter(user=user).exists():
             MessageStatus(message=msg, user=user).save()
         return super().get_context_data()
 
@@ -164,10 +165,6 @@ class MsgSend(LoginRequiredMixin, CreateView):
     extra_context = {'title': '傳送訊息'}
     fields = ['title', 'body']
     model = Message
-
-    def get_success_url(self):
-        messages.add_message(self.request, messages.SUCCESS, '訊息已送出！')
-        return self.request.POST.get('success_url')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -179,6 +176,10 @@ class MsgSend(LoginRequiredMixin, CreateView):
         form.instance.sender = self.request.user
         form.instance.recipient = User.objects.get(id=self.kwargs['rid'])
         return super().form_valid(form)
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, '訊息已送出！')
+        return self.request.POST.get('success_url')
 
 class MsgReply(LoginRequiredMixin, CreateView):
     extra_context = {'title': '回覆訊息'}
@@ -193,7 +194,7 @@ class MsgReply(LoginRequiredMixin, CreateView):
                 self.msg.sender.username,
                 self.msg.sender.first_name,
                 self.msg.created,
-                "> ".join(self.msg.body.split('\n'))
+                "\n> ".join(self.msg.body.split('\n'))
             ),
         }
 

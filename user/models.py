@@ -1,9 +1,8 @@
 from django.db.models import *
 from django.contrib.auth.models import User
-from course.models import Course, Enroll
+from course.models import Course
 
-
-class Message(Model):
+class Message(Model):   # 訊息
     sender = ForeignKey(User, CASCADE, related_name='outbox')
     course = ForeignKey(
         Course, CASCADE, related_name='notices', null=True, default=None)
@@ -20,8 +19,7 @@ class Message(Model):
             self.title
         )
 
-
-class MessageStatus(Model):
+class MessageStatus(Model): # 訊息讀取紀錄
     message = ForeignKey(Message, CASCADE, related_name='status')
     user = ForeignKey(User, CASCADE, related_name='read_list')
     read = DateTimeField('閱讀時間', auto_now_add=True)

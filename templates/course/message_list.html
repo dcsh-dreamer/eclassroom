@@ -3,14 +3,19 @@
 {% block content %}
 <ul class="list-group">
   {% for msg in message_list %}
-  <li class="list-group-item">
-    <small class="text-muted">{{ msg.created }}</small>
+  <li class="list-group-item d-md-flex">
     <a href="{% url 'user_msgread' msg.id %}">
-      {{ msg.title }} 
+      <span class="badge badge-danger">課程公告</span>
+      {{ msg.title }}
+      {% if not msg.read %}
+        <span class="badge badge-warning">New!</span>
+      {% endif %}
     </a>
-    {% if msg.id not in read_list %}
-      <span class="badge badge-warning">New!</span>
-    {% endif %}
+    <div class="ml-auto">
+      <small class="text-muted">
+        <i class="fas fa-clock"></i> {{ msg.created }}
+      </small>
+    </div>
   </li>
   {% endfor %}
 </ul>

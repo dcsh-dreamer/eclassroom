@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-  
+  {% with def_btn="btn btn-sm btn-primary"  %}
+  <div id="user-shortcuts">
+    <a href="{% url 'user_inbox' %}" class="{{ def_btn }}">收件匣</a>
+    <a href="{% url 'user_outbox' %}" class="{{ def_btn }}">寄件匣</a>
+  </div>
+  {% endwith %}
 {% endblock %}

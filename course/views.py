@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import *
 from django.contrib import messages
 from django import forms
 from .models import *
+from django.db.models import Subquery, OuterRef
 from user.models import Message
 
 class TeacherReqiuredMixin(AccessMixin):
@@ -133,7 +134,6 @@ class CourseEnrollSeat(CourseAccessMixin, UpdateView):  # 變更座號
             stu=self.request.user
         )
 
-
 class MsgList(CourseAccessMixin, ListView):  # 公告列表
     permission = COURSE_PERM_MEMBER
     extra_context = {'title': '公告列表'}
@@ -142,29 +142,27 @@ class MsgList(CourseAccessMixin, ListView):  # 公告列表
     template_name = 'course/message_list.html'
 
     def get_queryset(self):
-        self.extra_context.update({
-            'read_list': self.request.user.read_list.values_list('message', flat=True)
-        })
-        return self.course.notices.order_by('-created')
+        return self.course.notices.annotate(
+            read=Subquery(self.request.user.read_list.filter(
+                message=OuterRef('id')).values('read'))
+        ).order_by('-created')
 
 class MsgCreate(CourseAccessMixin, CreateView):  # 教師新增課程公告
     permission = COURSE_PERM_TEACHER
     extra_context = {'title': '新增公告'}
     model = Message
     fields = ['title', 'body']
-    template_name = 'user/message_form.html'
-
-    def get_success_url(self):
-        messages.add_message(self.request, messages.SUCCESS, '公告已張貼！')
-        return self.request.POST.get('success_url')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['success_url'] = self.request.META.get('HTTP_REFERER', '/')
-        ctx['course'] = self.course
         return ctx
 
     def form_valid(self, form):
         form.instance.course = self.course
         form.instance.sender = self.request.user
         return super().form_valid(form)
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, '公告已張貼！')
+        return self.request.POST.get('success_url')

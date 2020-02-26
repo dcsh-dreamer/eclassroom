@@ -20,9 +20,15 @@
         </a>
       {% else %}
         {% if msg.sender == user %}
-          <span>{{ msg.recipient.username }}({{ msg.recipient.first_name }})</span>
+          <span>
+            <i class="fas fa-arrow-circle-right"></i>
+            {{ msg.recipient.username }}({{ msg.recipient.first_name }})
+          </span>
         {% else %}
-          <span>{{ msg.sender.username }}({{ msg.sender.first_name }})</span>
+          <span>
+            <i class="fas fa-arrow-circle-left"></i>
+            {{ msg.sender.username }}({{ msg.sender.first_name }})
+          </span>
         {% endif %}
       {% endif %}
       <small class="text-muted">
@@ -32,4 +38,5 @@
   </li>
   {% endfor %}
 </ul>
+{% include "pagination.html" %}
 {% endblock %}
