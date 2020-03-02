@@ -35,6 +35,9 @@
       <a href="{% url 'course_msglist' course.id %}" class="{{ def_btn }}">
         <i class="fas fa-list"></i> 公告列表
       </a>
+      <a href="{% url 'assignment_list' course.id %}" class="{{ def_btn }}">
+        <i class="fas fa-list"></i> 作業
+      </a>
         {% if course|has_student:user %}
         <a href="{% url 'user_msgsend' course.teacher_id %}" class="{{ def_btn }}">
           <i class="fas fa-paper-plane"></i> 提問

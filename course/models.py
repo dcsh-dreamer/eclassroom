@@ -27,3 +27,34 @@ class Enroll(Model):
             self.seat, 
             self.stu.first_name
         )
+
+# 作業
+class Assignment(Model):
+    title = CharField('作業名稱', max_length=255)
+    desc = TextField('作業說明', null=True, default=None)
+    course = ForeignKey(Course, CASCADE, related_name='assignments')
+    created = DateTimeField('建立時間', auto_now_add=True)
+
+    def __str__(self):
+        return "{}:{}:{}".format(
+            self.id, 
+            self.course.name, 
+            self.title
+        )
+
+# 作品
+class Work(Model):
+    assignment = ForeignKey(Assignment, CASCADE, related_name='works')
+    user = ForeignKey(User, CASCADE, related_name='works')
+    memo = TextField('心得', blank=True, default='')
+    attachment = FileField('附件', upload_to='work/', null=True)
+    created = DateTimeField(auto_now_add=True)
+    score = IntegerField('成績', default=0)
+
+    def __str__(self):
+        return "{}:({}){}-{}".format(
+            self.id, 
+            self.assignment.course.name, 
+            self.assignment.title,
+            self.user.first_name, 
+        )

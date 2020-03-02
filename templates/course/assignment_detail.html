@@ -1,0 +1,13 @@
+{% extends "course/course_detail.html" %}
+
+{% block course_detail_body %}
+<div id="assignment-detail">
+  <h2 class="border-bottom">{{ assignment.title }}</h2>
+  <div class="assignment-body">
+    {{ assignment.desc|linebreaks }}
+  </div>
+</div>
+<div id="work-detail">
+  
+</div>
+{% endblock %}

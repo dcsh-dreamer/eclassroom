@@ -1,0 +1,27 @@
+{% extends "course/course_detail.html" %}
+
+{% load user_tags %}
+
+{% block course_detail_body %}
+{% if user|is_teacher %}
+<div class="mb-2">
+  <a href="{% url 'assignment_create' course.id %}" class="btn btn-sm btn-primary">新增作業</a>
+</div>  
+{% endif %}
+<div id="course_list">
+  {% for assignment in assignment_list %}
+  <div class="list-group">
+    <div class="list-group-item d-flex">
+      <a href="{% url 'assignment_view' course.id assignment.id %}">
+        {{ assignment.title }}
+      </a>
+      <small class="ml-auto">
+        <i class="fas fa-clock"></i>
+        {{ assignment.created }}
+      </small>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% include "pagination.html" %}
+{% endblock %}

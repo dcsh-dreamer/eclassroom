@@ -166,3 +166,40 @@ class MsgCreate(CourseAccessMixin, CreateView):  # 教師新增課程公告
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS, '公告已張貼！')
         return self.request.POST.get('success_url')
+
+class AssignmentList(CourseAccessMixin, ListView):
+    extra_context = {'title': '作業列表'}
+    permission = COURSE_PERM_MEMBER
+    paginate_by = 15
+
+    def get_queryset(self):
+        return self.course.assignments.order_by('-created')
+
+class AssignmentCreate(CourseAccessMixin, CreateView):
+    extra_context = {'title': '新增作業'}
+    permission = COURSE_PERM_TEACHER
+    model = Assignment
+    fields = ['title', 'desc']
+
+    def form_valid(self, form):
+        form.instance.course = self.course
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('assignment_list', args=[self.course.id])
+
+class AssignmentView(CourseAccessMixin, DetailView):
+    extra_context = {'title': '檢視作業'}
+    permission = COURSE_PERM_MEMBER
+    model = Assignment
+    pk_url_kwarg = 'aid'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['mywork'] = self.object.works.filter(user=self.request.user)
+        return ctx
+
+class WorkSubmit(CourseAccessMixin, CreateView):
+    model = Work
+    fields = '__all__'
+    template_name = 'form.html'
