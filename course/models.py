@@ -42,14 +42,34 @@ class Assignment(Model):
             self.title
         )
 
+import os
+
+# 自訂上傳檔案的存檔檔名
+def work_attach(instance, filename):
+    _, ext = os.path.splitext(filename)
+    return "assignment/{}/{}{}".format(
+        instance.assignment.id, 
+        instance.user.username, 
+        ext
+    )
+
 # 作品
 class Work(Model):
     assignment = ForeignKey(Assignment, CASCADE, related_name='works')
     user = ForeignKey(User, CASCADE, related_name='works')
-    memo = TextField('心得', blank=True, default='')
-    attachment = FileField('附件', upload_to='work/', null=True)
+    memo = TextField('心得', default='')
+    attachment = FileField('附件', upload_to=work_attach, null=True, blank=True)
     created = DateTimeField(auto_now_add=True)
     score = IntegerField('成績', default=0)
+
+    def save(self, *args, **kwargs):
+        try:
+            original = Work.objects.get(id=self.id)
+            if original.attachment != self.attachment:
+                original.attachment.delete(save=False)
+        except:
+            pass
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return "{}:({}){}-{}".format(

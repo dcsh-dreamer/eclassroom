@@ -173,7 +173,13 @@ class AssignmentList(CourseAccessMixin, ListView):
     paginate_by = 15
 
     def get_queryset(self):
-        return self.course.assignments.order_by('-created')
+        return self.course.assignments.annotate(
+            submitted=Subquery(
+                self.request.user.works.filter(
+                    assignment=OuterRef('id')
+                ).values('created')
+            )
+        ).order_by('-created')
 
 class AssignmentCreate(CourseAccessMixin, CreateView):
     extra_context = {'title': '新增作業'}
@@ -196,10 +202,48 @@ class AssignmentView(CourseAccessMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['mywork'] = self.object.works.filter(user=self.request.user)
+        if self.request.user.is_superuser or self.course.teacher == self.request.user:
+            sq = self.object.works.filter(user=OuterRef('stu'))
+            ctx['work_list'] = self.course.enroll_set.annotate(
+                wid = Subquery(sq.values('id')), 
+                memo = Subquery(sq.values('memo')), 
+                attach = Subquery(sq.values('attachment')),
+                created = Subquery(sq.values('created'))
+            ).select_related('stu').order_by('seat')
+        else:
+            mywork = self.object.works.filter(user=self.request.user).order_by('-id')
+            if mywork:
+                ctx['mywork'] = mywork[0]
         return ctx
 
 class WorkSubmit(CourseAccessMixin, CreateView):
+    extra_context = {'title': '繳交作業'}
+    permission = COURSE_PERM_STUDENT
     model = Work
-    fields = '__all__'
+    fields = ['memo', 'attachment']
     template_name = 'form.html'
+
+    def form_valid(self, form):
+        form.instance.assignment = Assignment(id=self.kwargs['aid'])
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse(
+            'assignment_view', 
+            args=[self.course.id, self.object.assignment.id]
+        )
+
+class WorkUpdate(CourseAccessMixin, UpdateView):
+    extra_context = {'title': '修改作業'}
+    permission = COURSE_PERM_STUDENT
+    model = Work
+    fields = ['memo', 'attachment']
+    template_name = 'form.html'
+    pk_url_kwarg = 'wid'
+
+    def get_success_url(self):
+        return reverse(
+            'assignment_view', 
+            args=[self.course.id, self.object.assignment.id]
+        )

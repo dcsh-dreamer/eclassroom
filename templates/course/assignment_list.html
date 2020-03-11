@@ -16,8 +16,14 @@
         {{ assignment.title }}
       </a>
       <small class="ml-auto">
+        {% if not assignment.submitted %}
+          <span class="badge badge-danger">未繳交</span>
+        {% else %}
+          <i class="fas fa-upload"></i>
+          {{ assignment.submitted|date:"Y-m-d H:i" }}
+        {% endif %}
         <i class="fas fa-clock"></i>
-        {{ assignment.created }}
+        {{ assignment.created|date:"Y-m-d H:i" }}
       </small>
     </div>
   </div>
