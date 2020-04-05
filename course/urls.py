@@ -12,6 +12,7 @@ assignment_urls = [
     path('<int:aid>/', AssignmentView.as_view(), name='assignment_view'),
     path('<int:aid>/submit/', WorkSubmit.as_view(), name='work_submit'),
     path('work/<int:wid>/', WorkUpdate.as_view(), name='work_update'),
+    path('score/<int:wid>/', WorkScore.as_view(), name='work_score'),
 ]
 
 urlpatterns = [

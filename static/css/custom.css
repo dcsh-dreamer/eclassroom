@@ -1,0 +1,38 @@
+#work-detail input[name="score"] {
+    width: 100px;
+}
+
+
+#work-list .work {
+    padding: .75rem 1.25rem;
+    margin: .25rem 0;
+    border: 1px solid #eee;
+    border-left: .25rem solid #eee;
+    border-radius: .25rem;
+}
+
+#work-list .work-memo {
+    margin-top: .5rem;
+}
+
+#work-list .work-meta {
+    display: flex;
+    justify-content: space-between;
+}
+
+#work-list .work-score {
+    font-size: 200%;
+    color: #FF7851;
+}
+
+.bd-callout-warning {
+    border-left-color: #f0ad4e;
+}
+
+.bd-callout-info {
+    border-left-color: #5bc0de;
+}
+
+.bd-callout-danger {
+    border-left-color: #FF7851;
+}

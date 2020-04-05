@@ -8,25 +8,27 @@
   <a href="{% url 'assignment_create' course.id %}" class="btn btn-sm btn-primary">新增作業</a>
 </div>  
 {% endif %}
-<div id="course_list">
+<div id="course_list" class="list-group">
   {% for assignment in assignment_list %}
-  <div class="list-group">
-    <div class="list-group-item d-flex">
+    <div class="list-group-item d-md-flex">
       <a href="{% url 'assignment_view' course.id assignment.id %}">
         {{ assignment.title }}
       </a>
-      <small class="ml-auto">
+      <div class="ml-auto">
+        <small>
         {% if not assignment.submitted %}
+          {% if not user == course.teacher %}
           <span class="badge badge-danger">未繳交</span>
+          {% endif %}
         {% else %}
           <i class="fas fa-upload"></i>
           {{ assignment.submitted|date:"Y-m-d H:i" }}
         {% endif %}
         <i class="fas fa-clock"></i>
         {{ assignment.created|date:"Y-m-d H:i" }}
-      </small>
+        </small>
+      </div>
     </div>
-  </div>
   {% endfor %}
 </div>
 {% include "pagination.html" %}

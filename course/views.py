@@ -206,10 +206,8 @@ class AssignmentView(CourseAccessMixin, DetailView):
             sq = self.object.works.filter(user=OuterRef('stu'))
             ctx['work_list'] = self.course.enroll_set.annotate(
                 wid = Subquery(sq.values('id')), 
-                memo = Subquery(sq.values('memo')), 
-                attach = Subquery(sq.values('attachment')),
-                created = Subquery(sq.values('created'))
-            ).select_related('stu').order_by('seat')
+                submitted = Subquery(sq.values('created')),
+            ).order_by('seat').values('seat', 'stu__first_name', 'wid', 'submitted')
         else:
             mywork = self.object.works.filter(user=self.request.user).order_by('-id')
             if mywork:
@@ -240,6 +238,19 @@ class WorkUpdate(CourseAccessMixin, UpdateView):
     model = Work
     fields = ['memo', 'attachment']
     template_name = 'form.html'
+    pk_url_kwarg = 'wid'
+
+    def get_success_url(self):
+        return reverse(
+            'assignment_view', 
+            args=[self.course.id, self.object.assignment.id]
+        )
+
+class WorkScore(CourseAccessMixin, UpdateView):
+    extra_context = {'title': '批改作業'}
+    permission = COURSE_PERM_TEACHER
+    model = Work
+    fields = ['score']
     pk_url_kwarg = 'wid'
 
     def get_success_url(self):
