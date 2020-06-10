@@ -194,6 +194,15 @@ class AssignmentCreate(CourseAccessMixin, CreateView):
     def get_success_url(self):
         return reverse('assignment_list', args=[self.course.id])
 
+class AssignmentEdit(CourseAccessMixin, UpdateView):
+    extra_context = {'title': '修改作業'}
+    permission = COURSE_PERM_TEACHER
+    model = Assignment
+    fields = ['title', 'desc']
+
+    def get_success_url(self):
+        return reverse('assignment_list', args=[self.course.id])
+
 class AssignmentView(CourseAccessMixin, DetailView):
     extra_context = {'title': '檢視作業'}
     permission = COURSE_PERM_MEMBER
@@ -258,3 +267,17 @@ class WorkScore(CourseAccessMixin, UpdateView):
             'assignment_view', 
             args=[self.course.id, self.object.assignment.id]
         )
+    
+    def get_form(self):
+        form = super().get_form()
+        form.fields['score'] = forms.ChoiceField(
+            label = '成績', 
+            choices = [
+                (100, "你好棒(100分)"), 
+                (90, "90分"),
+                (80, "80分"),
+                (70, "70分"),
+                (60, "60分"),
+            ],
+        )
+        return form

@@ -10,6 +10,7 @@ assignment_urls = [
     path('', AssignmentList.as_view(), name='assignment_list'), 
     path('create/', AssignmentCreate.as_view(), name='assignment_create'),
     path('<int:aid>/', AssignmentView.as_view(), name='assignment_view'),
+    path('<int:aid>/edit/', AssignmentEdit.as_view(), name='assignment_edit'),
     path('<int:aid>/submit/', WorkSubmit.as_view(), name='work_submit'),
     path('work/<int:wid>/', WorkUpdate.as_view(), name='work_update'),
     path('score/<int:wid>/', WorkScore.as_view(), name='work_score'),
