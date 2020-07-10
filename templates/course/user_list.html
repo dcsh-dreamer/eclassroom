@@ -9,6 +9,7 @@
         <th>帳號</th>
         <th>座號</th>
         <th>姓名</th>
+        <th>積分</th>
         <th>最近登入時間</th>
         <th></th>
       </tr>
@@ -20,7 +21,8 @@
         <td>{{ enroll.stu.username }}</td>
         <td>{{ enroll.seat }}</td>
         <td>{{ enroll.stu.first_name }}</td>
-        <td>{{ enroll.stu.last_login }}</td>
+        <td>{{ enroll.points|default:0 }}</td>
+        <td>{{ enroll.stu.last_login|date:"Y-m-d H:i" }}</td>
         <td>
           {% if enroll.stu_id != user.id %}
           <a href="{% url 'user_msgsend' enroll.stu_id %}" class="btn btn-sm btn-secondary">

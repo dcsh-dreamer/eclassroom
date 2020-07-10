@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title">{{ tuser.username }}</h5>
+    <h6 class="card-subtitle text-muted">{{ tuser.first_name }}</h6>
+  </div>
+  <div class="card-body">
+    {% if user == tuser %}
+      {% with def_btn="btn btn-sm btn-primary"  %}
+      <div id="user-shortcuts">
+        <a href="{% url 'user_inbox' %}" class="{{ def_btn }}">收件匣</a>
+        <a href="{% url 'user_outbox' %}" class="{{ def_btn }}">寄件匣</a>
+      </div>
+      {% endwith %}
+    {% endif %}
+    <div class="card-title">個人積點</div>
+    <ul>
+      {% for ph in tuser.point_list.all reversed %}
+      <li>
+        {{ ph.created|date:"Y-m-d H:i"}}
+        {{ ph.reason }}
+        +{{ ph.point }}點
+        {{ ph.assignment }}
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="card-title">選修的課程</div>
+    <ul>
+      {% for enroll in tuser.enroll_set.all %}
+      <li>
+        <a href="{% url 'course_view' enroll.course.id %}">
+          {{ enroll.course.name }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+  {{ user }}
+{% endblock %}

@@ -3,7 +3,10 @@
 {% block content %}
 <div class="alert alert-danger">
   <h1>403 Forbidden</h1>
-  <p>抱歉！您無權限進行這項操作！</p>
-  {{ reason }}
+  {% if exception %}
+    <p>{{ exception }}</p>
+  {% else %}
+    <p>抱歉！您無權限進行這項操作！</p>
+  {% endif %}
 </div>
 {% endblock content %}

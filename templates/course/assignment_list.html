@@ -5,7 +5,9 @@
 {% block course_detail_body %}
 {% if user|is_teacher %}
 <div class="mb-2">
-  <a href="{% url 'assignment_create' course.id %}" class="btn btn-sm btn-primary">新增作業</a>
+  <a href="{% url 'assignment_create' course.id %}" class="btn btn-sm btn-primary">
+    新增作業
+  </a>
 </div>  
 {% endif %}
 <div id="course_list" class="list-group">
@@ -16,13 +18,13 @@
       </a>
       <div class="ml-auto">
         <small>
-        {% if not assignment.submitted %}
-          {% if not user == course.teacher %}
-          <span class="badge badge-danger">未繳交</span>
-          {% endif %}
-        {% else %}
+        {% if assignment.submitted %}
           <i class="fas fa-upload"></i>
           {{ assignment.submitted|date:"Y-m-d H:i" }}
+        {% else %}
+          {% if not user == course.teacher and not user.is_superuser %}
+          <span class="badge badge-danger">未繳交</span>
+          {% endif %}
         {% endif %}
         <i class="fas fa-clock"></i>
         {{ assignment.created|date:"Y-m-d H:i" }}

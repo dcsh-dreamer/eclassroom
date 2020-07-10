@@ -2,7 +2,6 @@
     width: 100px;
 }
 
-
 #work-list .work {
     padding: .75rem 1.25rem;
     margin: .25rem 0;
@@ -35,4 +34,17 @@
 
 .bd-callout-danger {
     border-left-color: #FF7851;
+}
+
+#work-detail .score {
+    margin: 5pt;
+    font-size: 20pt;
+    color: red;
+    border-bottom: 3px double red;
+    text-align: right;
+}
+
+#work-list .score {
+    color: red;
+    border-bottom: 3px double red;
 }

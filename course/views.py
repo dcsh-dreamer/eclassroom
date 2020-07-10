@@ -6,13 +6,13 @@ from django.contrib import messages
 from django import forms
 from .models import *
 from django.db.models import Subquery, OuterRef
-from user.models import Message
+from user.models import Message, PointHistory
 
 class TeacherReqiuredMixin(AccessMixin):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_superuser and \
             not request.user.groups.filter(name='teacher').exists():
-            return self.handle_no_permission()
+            return super().handle_no_permission()
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -116,7 +116,10 @@ class CourseUsers(CourseAccessMixin, ListView): # 修課名單
     template_name = 'course/user_list.html'
 
     def get_queryset(self):
-        return self.course.enroll_set.select_related('stu').order_by('seat')
+        user_list = self.course.enroll_set.select_related('stu').order_by('seat')
+        return user_list.prefetch_related('stu__point_list').annotate(
+            points = Sum('stu__point_list__point')
+        )
 
 class CourseEnrollSeat(CourseAccessMixin, UpdateView):  # 變更座號
     permission = COURSE_PERM_STUDENT
@@ -199,9 +202,10 @@ class AssignmentEdit(CourseAccessMixin, UpdateView):
     permission = COURSE_PERM_TEACHER
     model = Assignment
     fields = ['title', 'desc']
+    pk_url_kwarg = 'aid'
 
     def get_success_url(self):
-        return reverse('assignment_list', args=[self.course.id])
+        return reverse('assignment_view', args=[self.course.id, self.object.id])
 
 class AssignmentView(CourseAccessMixin, DetailView):
     extra_context = {'title': '檢視作業'}
@@ -216,7 +220,8 @@ class AssignmentView(CourseAccessMixin, DetailView):
             ctx['work_list'] = self.course.enroll_set.annotate(
                 wid = Subquery(sq.values('id')), 
                 submitted = Subquery(sq.values('created')),
-            ).order_by('seat').values('seat', 'stu__first_name', 'wid', 'submitted')
+                score = Subquery(sq.values('score')),
+            ).order_by('seat').values('seat', 'stu__first_name', 'wid', 'submitted', 'score')
         else:
             mywork = self.object.works.filter(user=self.request.user).order_by('-id')
             if mywork:
@@ -233,6 +238,13 @@ class WorkSubmit(CourseAccessMixin, CreateView):
     def form_valid(self, form):
         form.instance.assignment = Assignment(id=self.kwargs['aid'])
         form.instance.user = self.request.user
+        # 繳交作業累積 2 點積分
+        PointHistory(
+            user = form.instance.user,
+            assignment = form.instance.assignment, 
+            reason = '繳交作業', 
+            point = 2
+        ).save()
         return super().form_valid(form)
     
     def get_success_url(self):
@@ -241,13 +253,20 @@ class WorkSubmit(CourseAccessMixin, CreateView):
             args=[self.course.id, self.object.assignment.id]
         )
 
-class WorkUpdate(CourseAccessMixin, UpdateView):
+class WorkUpdate(UpdateView):
     extra_context = {'title': '修改作業'}
-    permission = COURSE_PERM_STUDENT
     model = Work
     fields = ['memo', 'attachment']
     template_name = 'form.html'
     pk_url_kwarg = 'wid'
+
+    def get_object(self):
+        work = super().get_object()
+        if not work.user == self.request.user:
+            raise PermissionDenied("欲修改的作業不是你做的，不允許改修")
+        if work.score > 0:
+            raise PermissionDenied("作業已完成評分，不允許修改")
+        return work
 
     def get_success_url(self):
         return reverse(
@@ -280,4 +299,16 @@ class WorkScore(CourseAccessMixin, UpdateView):
                 (60, "60分"),
             ],
         )
+        self.oldscore = self.object.score # 本次評分前原始成績
         return form
+    
+    def form_valid(self, form):
+        # 初次受評
+        if self.oldscore == 0:
+            PointHistory(
+                user = self.object.user, 
+                assignment = self.object.assignment, 
+                reason = '作業受評', 
+                point = 1
+            ).save()
+        return super().form_valid(form)

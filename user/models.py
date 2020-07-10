@@ -1,6 +1,6 @@
 from django.db.models import *
 from django.contrib.auth.models import User
-from course.models import Course
+from course.models import Course, Assignment
 
 class Message(Model):   # 訊息
     sender = ForeignKey(User, CASCADE, related_name='outbox')
@@ -30,4 +30,18 @@ class MessageStatus(Model): # 訊息讀取紀錄
             self.message.sender,
             self.message.title,
             self.read
+        )
+
+class PointHistory(Model): # 使用者積點
+    user = ForeignKey(User, CASCADE, related_name='point_list')
+    assignment = ForeignKey(Assignment, CASCADE, related_name='+')
+    reason = CharField('積點原因', max_length=100)
+    point = IntegerField('點數', default=0)
+    created = DateTimeField('積點時間', auto_now_add=True)
+
+    def __str__(self):
+        return "{}: {} +{}點".format(
+            self.created, 
+            self.reason, 
+            self.point
         )

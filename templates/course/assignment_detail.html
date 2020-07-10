@@ -4,7 +4,16 @@
 
 {% block course_detail_body %}
 <div id="assignment-detail">
-  <h2 class="border-bottom">{{ assignment.title }}</h2>
+  <div class="d-flex border-bottom" style="justify-content: space-between;">
+    <h2>{{ assignment.title }}</h2>
+    {% if user.is_superuser or course.teacher == user %}
+    <div>
+      <a href="{% url 'assignment_edit' course.id assignment.id %}" class="btn btn-sm btn-primary">
+        編輯作業
+      </a>
+    </div>
+    {% endif %}
+  </div>
   <div class="assignment-body">
     {{ assignment.desc|linebreaks }}
   </div>
@@ -24,6 +33,9 @@
           </span>
           <i class="fas fa-pen-square"></i> 批改
         </a>
+        {% if work.score > 0 %}
+          <span class="score px-2">{{ work.score }}</span>
+        {% endif %}
       {% endif %}
     </div>
   {% endfor %}
@@ -33,13 +45,20 @@
   {% if mywork %}
     <div class="card">
       {% if mywork.memo %}
-      <div class="card-body">{{ mywork.memo|linebreaks }}</div>
+      <div class="card-body">
+        {% if mywork.score > 0 %}
+          <div class="text-right">
+            <span class="score px-2">{{ mywork.score }}</span>
+          </div>
+        {% endif %}
+        {{ mywork.memo|linebreaks }}
+      </div>
       {% endif %}
       <div class="card-footer d-flex">
         {% if mywork.attachment %}
         <div>
           <i class="fas fa-paperclip"></i>
-          <a href="{{mywork.attachment.url }}">
+          <a href="{{ mywork.attachment.url }}">
             附件下載
           </a>
         </div>

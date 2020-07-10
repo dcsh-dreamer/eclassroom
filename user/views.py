@@ -66,6 +66,8 @@ class UserList(SuperuserRequiredMixin, ListView):
 
 class UserView(SuperuserRequiredMixin, DetailView):
     model = User
+    template_name = 'user/user_detail.html'
+    context_object_name = 'tuser'
 
 class UserEdit(SuperuserRequiredMixin, UpdateView):
     model = User
@@ -122,7 +124,13 @@ class UserTeacherToggle(SuperuserRequiredMixin, RedirectView):
 
 class UserDashboard(LoginRequiredMixin, TemplateView):
     extra_context = {'title': '我的儀表板'}
-    template_name = 'user/dashboard.html'
+    template_name = 'user/user_detail.html'
+    context_object_name = 'tuser'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['tuser'] = self.request.user
+        return ctx
 
 class MsgList(LoginRequiredMixin, ListView):
     extra_context = {'title': '收件匣'}
