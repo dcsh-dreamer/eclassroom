@@ -110,16 +110,17 @@ class CourseEnroll(CourseAccessMixin, CreateView):  # 選修課程
         form.instance.stu = self.request.user
         return super().form_valid(form)
 
-class CourseUsers(CourseAccessMixin, ListView): # 修課名單
+class CourseUsers(CourseAccessMixin, ListView):  # 修課名單
     permission = COURSE_PERM_MEMBER
     extra_context = {'title': '修課名單'}
     template_name = 'course/user_list.html'
 
     def get_queryset(self):
-        user_list = self.course.enroll_set.select_related('stu').order_by('seat')
-        return user_list.prefetch_related('stu__point_list').annotate(
-            points = Sum('stu__point_list__point')
-        )
+        return self.course.enroll_set.select_related('stu')\
+            .prefetch_related('stu__point_list')\
+            .annotate(
+                points = Sum('stu__point_list__point')
+            ).order_by('seat')
 
 class CourseEnrollSeat(CourseAccessMixin, UpdateView):  # 變更座號
     permission = COURSE_PERM_STUDENT

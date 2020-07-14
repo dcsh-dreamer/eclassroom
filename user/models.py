@@ -32,7 +32,7 @@ class MessageStatus(Model): # 訊息讀取紀錄
             self.read
         )
 
-class PointHistory(Model): # 使用者積點
+class PointHistory(Model): # 使用者積點紀錄
     user = ForeignKey(User, CASCADE, related_name='point_list')
     assignment = ForeignKey(Assignment, CASCADE, related_name='+')
     reason = CharField('積點原因', max_length=100)
@@ -40,7 +40,7 @@ class PointHistory(Model): # 使用者積點
     created = DateTimeField('積點時間', auto_now_add=True)
 
     def __str__(self):
-        return "{}: {} +{}點".format(
+        return "{}: {} {}點".format(
             self.created, 
             self.reason, 
             self.point
