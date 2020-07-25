@@ -117,7 +117,6 @@ class CourseUsers(CourseAccessMixin, ListView):  # 修課名單
 
     def get_queryset(self):
         return self.course.enroll_set.select_related('stu')\
-            .prefetch_related('stu__point_list')\
             .annotate(
                 points = Sum('stu__point_list__point')
             ).order_by('seat')
@@ -304,12 +303,19 @@ class WorkScore(CourseAccessMixin, UpdateView):
         return form
     
     def form_valid(self, form):
-        # 初次受評
-        if self.oldscore == 0:
+        def score_to_point(score): # 成績轉換為點數
+            return 2 if score >= 90 else 1 if score >= 80 else 0
+
+        oscore = self.oldscore          # 原始成績
+        nscore = form.instance.score    # 本次成績
+        opoint = score_to_point(oscore) # 原始成績積點
+        npoint = score_to_point(nscore) # 本次成績積點
+
+        if opoint != npoint:
             PointHistory(
                 user = self.object.user, 
                 assignment = self.object.assignment, 
-                reason = '作業受評', 
-                point = 1
+                reason = f'教師評分: {oscore} -> {nscore}',
+                point = npoint - opoint,
             ).save()
         return super().form_valid(form)

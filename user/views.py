@@ -125,7 +125,6 @@ class UserTeacherToggle(SuperuserRequiredMixin, RedirectView):
 class UserDashboard(LoginRequiredMixin, TemplateView):
     extra_context = {'title': '我的儀表板'}
     template_name = 'user/user_detail.html'
-    context_object_name = 'tuser'
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

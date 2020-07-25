@@ -9,7 +9,7 @@
   <div class="card-body">
     {% if user == tuser %}
       {% with def_btn="btn btn-sm btn-primary"  %}
-      <div id="user-shortcuts">
+      <div id="user-shortcuts" class="mb-2">
         <a href="{% url 'user_inbox' %}" class="{{ def_btn }}">收件匣</a>
         <a href="{% url 'user_outbox' %}" class="{{ def_btn }}">寄件匣</a>
       </div>
@@ -20,9 +20,13 @@
       {% for ph in tuser.point_list.all reversed %}
       <li>
         {{ ph.created|date:"Y-m-d H:i"}}
-        {{ ph.reason }}
-        +{{ ph.point }}點
-        {{ ph.assignment }}
+        {{ ph.reason }}: 
+        {% with aid=ph.assignment.id cid=ph.assignment.course.id %}
+          <a href="{% url 'assignment_view' cid aid %}">
+          {{ ph.assignment.title }}
+          </a>
+        {% endwith %}
+        <span class="badge badge-warning">{{ ph.point }}點</span>
       </li>
       {% endfor %}
     </ul>
@@ -38,5 +42,4 @@
     </ul>
   </div>
 </div>
-  {{ user }}
 {% endblock %}
