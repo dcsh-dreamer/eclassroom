@@ -19,4 +19,6 @@ urlpatterns = [
     path('<int:pk>/password/', UserPasswordUpdate.as_view(), name='user_password'),
     path('<int:uid>/teacher/', UserTeacherToggle.as_view(), name='user_teacher_toggle'),
     path('msg/', include(msg_urlpatterns)),
+    path('q/', QEdit.as_view(), name='q_edit'),
+    path('q/create/', QCreate.as_view(), name='q_create'),
 ]

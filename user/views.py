@@ -219,3 +219,23 @@ class MsgReply(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS, '訊息已送出！')
         return self.request.POST.get('success_url')
+
+class QCreate(LoginRequiredMixin, CreateView):
+    model = Questionnaire
+    fields = '__all__'
+    template_name = "form.html"
+
+    def get_initial(self):
+        return {
+            'q1': 4, 
+        }
+
+    # def get_form(self):
+    #     form = super().get_form()
+    #     form.fields['q1'].widget = forms.RadioSelect
+    #     return form
+
+class QEdit(LoginRequiredMixin, UpdateView):
+    model = Questionnaire
+    fields = '__all__'
+    template_name = "form.html"

@@ -45,3 +45,22 @@ class PointHistory(Model): # 使用者積點紀錄
             self.reason, 
             self.point
         )
+
+class Questionnaire(Model):   # 問卷
+    ACCEPTANCE_CHOICES = [
+        (1, '非常不同意'), 
+        (2, '不同意'),
+        (3, '同意'),
+        (4, '非常同意'),
+    ]
+    user = ForeignKey(User, CASCADE, related_name='questionary')
+    q1 = IntegerField(
+        '1.我很崇拜程式設計很厲害的人', default=0, choices=ACCEPTANCE_CHOICES)
+    q2 = IntegerField(
+        '2.我對學習程式設計感到有興趣', default=0, choices=ACCEPTANCE_CHOICES)
+    q3 = IntegerField(
+        '3.學好程式設計在現代社會是很重要的', default=0, choices=ACCEPTANCE_CHOICES)
+    t1 = TextField('4.請列舉曾經學過的程式語言', default='')
+    t2 = TextField('5.請簡述對本課程的期望', default='')
+    # created = DateTimeField(auto_now_add=True)
+    # updated = DateTimeField(auto_now_add=True, auto_now=True)
