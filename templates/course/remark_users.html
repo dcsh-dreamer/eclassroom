@@ -1,0 +1,17 @@
+{% extends "course/course_detail.html" %}
+
+{% block course_detail_body %}
+<div id="work-list">
+  {% for stu in enroll_list %}
+  <div class="work">
+    <span class="badge badge-light">{{ stu.seat }}</span>
+    {% with cid=course.id sid=stu.stu_id %}
+      {{ stu.stu.first_name }}
+      <a href="{% url 'user_remark' cid sid %}" class="btn btn-sm btn-primary">
+        <i class="fas fa-search"></i> 查看心得
+      </a>
+    {% endwith %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

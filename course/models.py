@@ -19,6 +19,7 @@ class Enroll(Model):
     stu = ForeignKey(User, CASCADE)         # 選修學生
     course = ForeignKey(Course, CASCADE)    # 選修課程
     seat = IntegerField('座號', default=0)
+    remark_score = IntegerField('心得成績', default=0)
 
     def __str__(self):
         return "{}: {}-{}-{}".format(

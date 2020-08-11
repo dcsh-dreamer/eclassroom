@@ -1,0 +1,26 @@
+{% extends "course/course_detail.html" %}
+
+{% block course_detail_body %}
+<h2>{{ atitle }}</h2>
+<div id="work-list">
+  {% for work in object_list  %}
+  <div class="work d-flex">
+    <div class="user-info mr-2">
+      <span class="badge badge-primary">
+        {{ work.seat }}
+        {{ work.stu__first_name }}
+      </span>
+    </div>
+    <div class="remark">
+      {% if work.remark %}
+        {{ work.remark|linebreaksbr }}
+      {% else %}
+        <span class="badge badge-danger">
+          尚未繳交
+        </span>        
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -11,6 +11,9 @@
       <a href="{% url 'assignment_edit' course.id assignment.id %}" class="btn btn-sm btn-primary">
         編輯作業
       </a>
+      <a href="{% url 'remark_list' course.id assignment.id %}" class="btn btn-sm btn-info">
+        查看心得
+      </a>
     </div>
     {% endif %}
   </div>

@@ -16,6 +16,12 @@ assignment_urls = [
     path('score/<int:wid>/', WorkScore.as_view(), name='work_score'),
 ]
 
+remark_urls = [
+    path('', RemarkUsers.as_view(), name='remark_users'),
+    path('<int:uid>/', UserRemark.as_view(), name='user_remark'),
+    path('assignment/<int:aid>/', AssignRemark.as_view(), name='remark_list'),
+]
+
 urlpatterns = [
     path('', CourseList.as_view(), name='course_list'), 
     path('create/', CourseCreate.as_view(), name='course_create'),
@@ -26,4 +32,5 @@ urlpatterns = [
     path('<int:cid>/seat/', CourseEnrollSeat.as_view(), name='course_seat'),
     path('<int:cid>/msg/', include(msg_urlpatterns)),
     path('<int:cid>/assign/', include(assignment_urls)),
+    path('<int:cid>/remark/', include(remark_urls)),
 ]

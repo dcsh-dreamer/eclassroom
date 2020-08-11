@@ -4,7 +4,7 @@
 
 {% block content %}
 <div id="course_view" class="card">
-  {% with def_btn="btn btn-sm btn-primary" %}
+  {% with b1="btn btn-sm btn-primary" b2="btn btn-sm btn-secondary" %}
   <div class="card-header d-flex">
     <div>
       <a href="{% url 'course_view' course.id %}">{{ course.name }}</a>
@@ -15,7 +15,7 @@
       <span class="badge badge-light">
         選課密碼： {{ course.enroll_password }}
       </span>
-      <a href="{% url 'course_edit' course.id %}" class="{{ def_btn }}">
+      <a href="{% url 'course_edit' course.id %}" class="{{ b1 }}">
         <i class="fas fa-edit"></i> 編輯
       </a>
     </div >
@@ -25,33 +25,36 @@
     {% block course_detail_body %}
     <div id="student_op" class="btn-group">
       {% if not course|has_member:user and not user.is_superuser %}
-      <a href="{% url 'course_enroll' course.id %}" class="{{ def_btn }} active">
+      <a href="{% url 'course_enroll' course.id %}" class="{{ b1 }}">
         <i class="fas fa-id-badge"></i> 選修
       </a>
       {% else %}
-      <a href="{% url 'course_users' course.id %}" class="{{ def_btn }}">
+      <a href="{% url 'course_users' course.id %}" class="{{ b1 }}">
         <i class="fas fa-users"></i> 修課名單
       </a>
-      <a href="{% url 'course_msglist' course.id %}" class="{{ def_btn }}">
+      <a href="{% url 'course_msglist' course.id %}" class="{{ b1 }}">
         <i class="fas fa-list"></i> 公告列表
       </a>
-      <a href="{% url 'assignment_list' course.id %}" class="{{ def_btn }}">
+      <a href="{% url 'assignment_list' course.id %}" class="{{ b1 }}">
         <i class="fas fa-list"></i> 作業
       </a>
         {% if course|has_student:user %}
-        <a href="{% url 'user_msgsend' course.teacher_id %}" class="{{ def_btn }}">
+        <a href="{% url 'user_msgsend' course.teacher_id %}" class="{{ b1 }}">
           <i class="fas fa-paper-plane"></i> 提問
         </a>
-        <a href="{% url 'course_seat' course.id %}" class="{{ def_btn }}">
+        <a href="{% url 'course_seat' course.id %}" class="{{ b1 }}">
           <i class="fas fa-chair"></i> 更改座號
         </a>
         {% endif %}
       {% endif %}
     </div>
       {% if course.teacher == user %}
-      <div id="teacher_op" class="mt-2">
-        <a href="{% url 'course_msgbroadcast' course.id %}" class="btn btn-sm btn-secondary">
+      <div id="teacher_op" class="btn-group">
+        <a href="{% url 'course_msgbroadcast' course.id %}" class="{{ b2 }}">
           <i class="fas fa-bullhorn"></i> 發布公告
+        </a>
+        <a href="{% url 'remark_users' course.id %}" class="{{ b2 }}">
+          <i class="fas fa-lightbulb"></i> 學生心得
         </a>
       </div>
       {% endif %}

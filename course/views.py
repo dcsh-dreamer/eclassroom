@@ -319,3 +319,67 @@ class WorkScore(CourseAccessMixin, UpdateView):
                 point = npoint - opoint,
             ).save()
         return super().form_valid(form)
+
+class RemarkUsers(CourseAccessMixin, ListView):
+    permission = COURSE_PERM_TEACHER
+    template_name = 'course/remark_users.html'
+    extra_context = {'title': '學生心得列表'}
+    
+    def get_queryset(self):
+        return self.course.enroll_set\
+            .select_related('stu')\
+            .order_by('seat')
+    
+class UserRemark(CourseAccessMixin, UpdateView):
+    permission = COURSE_PERM_TEACHER
+    template_name = 'course/remark_score.html'
+    extra_context = {'title': '查看學生心得'}
+    model = Enroll
+    fields = ['remark_score']
+
+    def get_object(self):
+        return Enroll.objects.get(
+            course = self.kwargs['cid'], 
+            stu = self.kwargs['uid'],
+        )
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['assignment_list'] = Assignment.objects.filter(
+                course_id = self.kwargs['cid'],
+            ).annotate(
+                remark = Subquery(
+                    Work.objects.filter(
+                        user = self.kwargs['uid'], 
+                        assignment = OuterRef('id')
+                    ).values_list('memo').order_by('-id')[:1],
+                ),
+            )
+        ctx['stu'] = self.course.enroll_set.filter(
+                stu=self.kwargs['uid']
+            ).values('seat', 'stu__first_name')[0]
+        return ctx
+    
+    def get_success_url(self):
+        return reverse('remark_users', args=[self.course.id])
+
+class AssignRemark(CourseAccessMixin, ListView):
+    permission = COURSE_PERM_TEACHER
+    template_name = 'course/remark_list.html'
+    extra_context = {'title': '查看作業心得'}
+
+    def get_queryset(self):
+        return self.course.enroll_set.annotate(
+            remark = Subquery(
+                Work.objects.filter(
+                    assignment_id = self.kwargs['aid'],
+                    user = OuterRef('stu'),
+                ).values_list('memo').order_by('-id')[:1],
+            ),
+        ).order_by('seat').values('seat', 'stu__first_name', 'remark')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['atitle'] = Assignment.objects.get(id=self.kwargs['aid']).title
+        return ctx
+

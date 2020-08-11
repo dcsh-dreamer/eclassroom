@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2>
+      <span class="badge badge-primary">
+        {{ stu.seat }}
+      </span>
+      {{ stu.stu__first_name }}
+    </h2>
+  </div>
+  <div class="card-body" id="work-list">
+    {% for a in assignment_list %}
+    <div class="work">
+      <div class="assignment">
+        <span class="badge badge-primary">
+          {{ forloop.counter }}
+        </span>
+        <a href="{% url 'assignment_view' a.course_id a.id %}">
+          {{ a.title }}
+        </a>
+      </div>
+      <div class="remark">
+        {% if a.remark %}
+          {{ a.remark|linebreaksbr }}
+        {% else %}
+          <span class="badge badge-danger">未繳交</span>
+        {% endif %}
+      </div>
+    </div>    
+    {% endfor %}
+  </div>
+  <div class="card-footer">
+    <form action="" method="post">
+      {% csrf_token %}
+      {{ form }}
+      <input type="submit" value="評分" class="btn btn-sm btn-primary">
+    </form>
+  </div>
+</div>
+{% endblock %}
