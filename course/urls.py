@@ -33,4 +33,5 @@ urlpatterns = [
     path('<int:cid>/msg/', include(msg_urlpatterns)),
     path('<int:cid>/assign/', include(assignment_urls)),
     path('<int:cid>/remark/', include(remark_urls)),
+    path('<int:cid>/score/', CourseScore.as_view(), name='course_score'),
 ]

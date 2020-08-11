@@ -380,6 +380,44 @@ class AssignRemark(CourseAccessMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['atitle'] = Assignment.objects.get(id=self.kwargs['aid']).title
+        ctx['atitle'] = Assignment.objects.get(
+                id=self.kwargs['aid']
+            ).title
         return ctx
 
+class CourseScore(CourseAccessMixin, TemplateView):
+    permission = COURSE_PERM_TEACHER
+    template_name = 'course/course_score.html'
+    extra_context = {'title': '成績總表'}
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        students = self.course.enroll_set\
+            .select_related('stu')\
+            .order_by('seat')
+        assignments = self.course.assignments.all()
+        aid_list = assignments.values_list('id')    # 本課程所有作業編號
+        acnt = assignments.count()
+        # 本課程所有學生上傳的作品
+        works = Work.objects.filter(assignment__in=aid_list)
+        # 作業編號 -> 列表索引
+        idmap = {}
+        for a in enumerate(assignments):
+            idmap[a[1].id] = a[0] 
+        # 每位學生的所有作業成績
+        for stu in students:
+            scores = [0]*(acnt+2)   # 作業 + 心得 + 平均
+            sum = stu.remark_score
+            # 用 filter 函式從 works 篩出當前學生的作品
+            sworks = filter(lambda w: w.user_id == stu.id, works)
+            for w in sworks:
+                scores[idmap[w.assignment_id]] = w.score
+                sum += w.score
+            
+            scores[acnt] = stu.remark_score
+            scores[acnt+1] = round(sum / (acnt+1), 1)
+            stu.scores = scores
+
+        ctx['assignment_list'] = assignments
+        ctx['student_list'] = students
+        return ctx
